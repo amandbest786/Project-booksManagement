@@ -1,4 +1,3 @@
-const moment = require("moment");
 const bookModel = require("../models/bookModel.js");
 const userModel = require("../models/userModel.js");
 const reviewModel = require("../models/reviewModel.js");
@@ -33,11 +32,9 @@ const createBook = async function(req, res) {
             return res.status(400).send({status:true, msg:"Title is already exists."})   //Title is Unique 
         }
         if (!isValidValue(excerpt)){
-            return res.status(400).send({status:false, msg:"Please provide the excerpt"})   //Excerpt is Mandory 
-        }
-        if (!isValidValue(userId)){
-            return res.status(400).send({status:false, msg:"Please provide the User Id"})   //UserID is Mandory 
-        }
+            return res.status(400).send({status:false, msg:"Please provide the excerpt"})  //Excerpt is Mandory 
+        }  
+
         const isValidUserId = await userModel.findById(userId)
         if (!isValidUserId){
             return res.status(404).send({status:true, msg:"User not found."})   //find User in userModel
@@ -73,26 +70,18 @@ const createBook = async function(req, res) {
 
 
 // -----------GetBooks-----------------------------------------------------------------------------------
-const getBooks = async function(req, res) {
+const getBooksbyquery = async function(req, res) {
     try{
-        // if(!isValidUserId.length == 0){
-        //     res.status(404).send({status:false, msg:"No Book found with the provided user ID"})  //Validate the value that is provided by the Client.
-        // }
         const querry = req.query
         const filter = {
             ...querry,         //store the conditions in filter variable
             isDeleted : false
         }
-        const findBooks = await bookModel.find(filter).select({title : 1, excerpt : 1, userId : 1, category : 1, releasedAt : 1, reviews : 1})    //finding the book with filters
+        const findBooks = await bookModel.find(filter).select({title : 1, excerpt : 1, userId : 1, category : 1, releasedAt : 1, reviews : 1}).sort({title : 1})    //finding the book with filters
         if (findBooks.length == 0){
             return res.status(404).send({status:true, msg:"No book found."})       //Validate the value that is provided by the Client.
         }
-        const sortedBooks = findBooks.sort(function(a, b){      //Sorting the books in the Alphabetically order
-            if(a.title < b.title) { return -1; }            
-            if(a.title > b.title) { return 1; }
-            return 0;
-        })
-        res.status(200).send({status: true, msg: "Books list", data: sortedBooks})  
+        res.status(200).send({status: true, msg: "Books list", data: findBooks})  
     }
     catch(err) {
         console.log(err)
@@ -104,7 +93,7 @@ const getBooks = async function(req, res) {
 // -----------getBooksById-----------------------------------------------------------------------------------
 const getBooksById = async function(req, res) {
     try{
-        const bookId = req.params.bookId        
+        const bookId = req.params.bookId  
         const bookDetails = await bookModel.findOne({_id : bookId, isDeleted:false})     //finding the bookId
         if (!bookDetails){
             return res.status(404).send({status:true, msg:"No books found."})     //If no Books found in bookModel
@@ -113,7 +102,7 @@ const getBooksById = async function(req, res) {
         const finalBookDetails = {
             ...bookDetails._doc,        //Storing data into new Object
             reviewsData : reviews
-        }        
+        }
         res.status(200).send({status:true, msg:"Books list.", data:finalBookDetails})   
     }
     catch(err) {
@@ -131,11 +120,6 @@ const updateBooks = async function(req, res) {
         if (!IsValidBookId){
             return res.status(404).send({status:true, msg:"no book found."})
         }
-        // const userIdFromParam = req.params.userId
-        // const userIdFromBook = IsValidBookId.userId.toString()    //change the userId to string
-        // if (userIdFromParam !== userIdFromBook) {          // for similar userId from param & bookModel to update
-        //     return res.status(403).send({status : false, msg : "This is not your book, you can not update it."})
-        // }
         const dataToUpdate = req.body
         if(!isValidDetails(dataToUpdate)){
             res.status(400).send({status:false, msg:"Please provide the Book details to update"})  //Validate the value that is provided by the Client.
@@ -170,16 +154,11 @@ const deleteBooks = async function(req, res) {
         if (!IsValidBookId){
             return res.status(404).send({status:true, msg:"No book found."})
         }
-        // const userIdFromParam = req.params.userId
-        // const userIdFromBook = IsValidBookId.userId.toString()    //change the userId to string
-        // if (userIdFromParam !== userIdFromBook) {          //for checking thez similar userId from param & bookModel 
-        //     return res.status(403).send({status : false, msg : "This is not your book, you can not delete it."})
-        // }
         const deletedDetails = await bookModel.findOneAndUpdate(
             {_id : bookId},    //finding the bookId and mark the isDeleted to true & update the date at deletedAt.
             {isDeleted : true, deletedAt : new Date()},
             {new : true})    
-        res.status(201).send({status:true, msg:"Book deleted successfully",data:deletedDetails})       
+        res.status(200).send({status:true, msg:"Book deleted successfully",data:deletedDetails})       
     }
     catch(err) {
         console.log(err)
@@ -188,7 +167,7 @@ const deleteBooks = async function(req, res) {
 }
 
 module.exports.createBook = createBook;
-module.exports.getBooks = getBooks;
+module.exports.getBooksbyquery = getBooksbyquery;
 module.exports.getBooksById = getBooksById;
 module.exports.updateBooks = updateBooks;
 module.exports.deleteBooks = deleteBooks;

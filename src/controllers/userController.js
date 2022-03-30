@@ -57,7 +57,7 @@ const createUser = async function(req, res) {
         if (!isValidValue(password)){
             return res.status(400).send({status:false, msg:"Please provide the Password"})   //password is mandory 
         }
-        if(!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,15}$/.test(password)){
+        if(!(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,15}$/.test(password))){
             return res.status(400).send({status:false,msg:"Please provide valid Password"})    //Regex for checking the valid password format 
         }
         const data = await userModel.create(user)  //creating the User details

@@ -13,7 +13,7 @@ router.post("/login", userController.login);   // LoginUser
 
 //book API's
 router.post("/books", middleware.authorizationToCreate, bookController.createBook);   // CreateBook
-router.get("/books", middleware.authentication, bookController.getBooks);   //GetBooks
+router.get("/books", middleware.authentication, bookController.getBooksbyquery);   //GetBooks
 router.get("/books/:bookId", middleware.authorization, bookController.getBooksById);   //GetBooksbyID
 router.put("/books/:bookId", middleware.authorization, bookController.updateBooks);   //UpdateBooks
 router.delete("/books/:bookId", middleware.authorization, bookController.deleteBooks);   //DeleteBooksbyID

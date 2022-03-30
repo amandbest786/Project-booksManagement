@@ -45,10 +45,10 @@ const createReview = async function(req, res) {
         const data = await reviewModel.create(finalData)
         res.status(201).send({status:true, msg:"book review saved successfully",data:data})
         
-        const reviewCount = await reviewModel.find({ bookId: bookId, isDeleted:false}).count();
-        const countUpdate = await bookModel.findOneAndUpdate(
-            { _id: req.params.bookId },
-            { reviews: reviewCount }
+        const reviewCount = await reviewModel.find({ bookId: bookId, isDeleted:false})
+        await bookModel.findOneAndUpdate(
+            { _id: bookId },
+            { reviews: reviewCount.length }
         );
     }
     catch(err) {
@@ -70,11 +70,6 @@ const updateReview = async function(req, res) {
         const IsValidReviewId = await reviewModel.findOne({_id : reviewId, isDeleted:false})        //finding the reviewId
         if (!IsValidReviewId){
             return res.status(400).send({status:true, msg:"no review exists to update."})
-        }
-        const bookIdFromReview = IsValidReviewId.bookId
-        const userIdFromReview = await bookModel.findById(bookIdFromReview)
-        if (userIdFromReview.userId.toString() !== IsValidBookId.userId.toString()) {          // for similar userId from param & bookModel to update
-            return res.status(403).send({status : false, msg : "Unauthorized access. Review can't be updated"})
         }
         const dataToUpdate = req.body
         if(!isValidDetails(dataToUpdate)){
@@ -110,20 +105,14 @@ const deleteReview = async function(req, res) {
         if (!IsValidReviewId){
             return res.status(404).send({status:true, msg:"no review exists to delete."})
         }
-        const bookIdFromReview = IsValidReviewId.bookId
-        const userIdFromReview = await bookModel.findById(bookIdFromReview)
-        if (userIdFromReview.userId.toString() !== IsValidBookId.userId.toString()) {     //for checking the similar userId from params or bookModel.
-            return res.status(403).send({status : false, msg : "Unauthorized access. Review can't be delete"})
-        }
-
         const deletedData = await reviewModel.findOneAndUpdate(
             {_id : reviewId},     //finding the reviewId and mark the isDeleted to true & update the date at deletedAt.
             {isDeleted : true, deletedAt : new Date()},
             {new : true})
         res.status(201).send({status:true, msg:"review deleted successfully", data:deletedData})
-        const reviewCount = await reviewModel.find({ bookId: bookId,  isDeleted:false}).count();
-        const countUpdate = await bookModel.findOneAndUpdate(
-            { _id: req.params.bookId },
+        const reviewCount = await reviewModel.find({ bookId: bookId,  isDeleted:false})
+        await bookModel.findOneAndUpdate(
+            { _id: bookId },
             { reviews: reviewCount.length }
         );
     }

@@ -24,7 +24,9 @@ const authorizationToCreate = async function(req, res, next){         //authoriz
         }
         const decodedToken = jwt.verify(token, "Project-Books");        //verify the secret key
         const userLoggedIn = decodedToken._id       //decode token by checking the userId
-        const userIdFromBody = req.body.userId      
+        const userIdFromBody = req.body.userId
+        if (!userIdFromBody){
+            return res.status(400).send({status:false, msg:"Please provide the User Id"})}
         if (userLoggedIn !== userIdFromBody) return res.status(403).send("You are not autherised to access.")    //similar user or not
         next()      //if token is for the same user then move to the next
 
@@ -44,13 +46,15 @@ const authorization = async function(req, res, next){         //authorization fo
         const decodedToken = jwt.verify(token, "Project-Books");        //verify the secret key
         const userLoggedIn = decodedToken._id       //decode token by checking the userId
         const bookId = req.params.bookId
-        const findBook = await bookModel.findById(bookId)       //finding the bookId in bookModel
+        const findBook = await bookModel.findById(bookId)          //finding the bookId in bookModel
+        if (!findBook){
+            res.status(400).send({status:false, msg:"invalid book id"})
+        }
         const userIdFromBook = findBook.userId.toString()    //converting UserId into Strings
         if (userLoggedIn !== userIdFromBook) return res.status(403).send("You are not autherised to access.")      //similar user or not
         next()       //if token is for the same user then move to the next
-
     }
-    catch (err) {
+    catch (err) {  
         console.log(err)
         res.status(500).send({msg: err.message})
     }

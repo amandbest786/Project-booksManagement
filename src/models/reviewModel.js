@@ -12,9 +12,7 @@ const reviewSchema = new mongoose.Schema({
         default : 'Guest',
         value: "reviewer's name"
     },
-    reviewedAt: {
-        type : Date
-    },
+    reviewedAt: {Date},
     rating: {
         type : Number,
         min : [1, "rating should be greater than 1"],
