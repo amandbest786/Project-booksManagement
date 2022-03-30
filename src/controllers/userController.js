@@ -84,13 +84,13 @@ const login = async function(req, res) {
         if (!isValidValue(password)){
             return res.status(400).send({status:false, msg:"Please provide the password"})  //password is mandatory
         }
-        const isValidUser = await userModel.findOne({email, password});   //validating the email/password in the userModel.
-        if (!isValidUser){
+        const User = await userModel.findOne({email, password});   //validating the email/password in the userModel.
+        if (!User){
         return res.status(401).send({status: false, msg: "Email or Password is not correct, Please check your credentials again.",})    
         }  
         const token = jwt.sign(   //creating the token for the authentication.
             {
-                _id : isValidUser._id   //payload(details that we saved in this token)
+                userId : User._id   //payload(details that we saved in this token)
             },
                 "Project-Books", { expiresIn: '30000mins' });  //secret key with the expiry
         res.setHeader("x-api-key", token);  //setting token in header

@@ -8,21 +8,21 @@ const middleware = require("../middlewares/middleware.js");
 
 //user API's
 router.post("/register", userController.createUser);   // CreateUser
-router.post("/login", userController.login);   // LoginUser
+router.post("/login", userController.login);   // LoginUser 
 
 
 //book API's
-router.post("/books", middleware.authorizationToCreate, bookController.createBook);   // CreateBook
-router.get("/books", middleware.authentication, bookController.getBooksbyquery);   //GetBooks
-router.get("/books/:bookId", middleware.authorization, bookController.getBooksById);   //GetBooksbyID
-router.put("/books/:bookId", middleware.authorization, bookController.updateBooks);   //UpdateBooks
-router.delete("/books/:bookId", middleware.authorization, bookController.deleteBooks);   //DeleteBooksbyID
+router.post("/books", middleware.userAuth, bookController.createBook);   // CreateBook
+router.get("/books", middleware.userAuth, bookController.getBooksbyquery);   //GetBooks
+router.get("/books/:bookId", middleware.userAuth, bookController.getBooksById);   //GetBooksbyID
+router.put("/books/:bookId", middleware.userAuth, bookController.updateBooks);   //UpdateBooks
+router.delete("/books/:bookId", middleware.userAuth, bookController.deleteBooks);   //DeleteBooksbyID
 
 
 //Review API's
-router.post("/books/:bookId/review", /*middleware.authorization,*/ reviewCrontroller.createReview);   //CreateReview
-router.put("/books/:bookId/review/:reviewId", /*middleware.authorization,*/ reviewCrontroller.updateReview);   //UpdateReview
-router.delete("/books/:bookId/review/:reviewId", /*middleware.authorization,*/ reviewCrontroller.deleteReview);   //DeleteReview
+router.post("/books/:bookId/review", reviewCrontroller.createReview);   //CreateReview
+router.put("/books/:bookId/review/:reviewId", reviewCrontroller.updateReview);   //UpdateReview
+router.delete("/books/:bookId/review/:reviewId", reviewCrontroller.deleteReview);   //DeleteReview
 
 
 module.exports = router;
